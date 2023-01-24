@@ -14,9 +14,9 @@ NOT_OCAMLFIND=$(LAUNCH) not-ocamlfind
 MKCAMLP5=$(LAUNCH) mkcamlp5
 SYNTAX := camlp5o
 
-PACKAGES := $(PACKAGES),fmt,pa_ppx.base
-TARGET := pa_ppx_seq.cma
-ML := pa_seq.ml
+PACKAGES := $(PACKAGES),fmt,pa_ppx.base,re
+TARGET := pa_ppx_string.cma
+ML := pa_string.ml
 CMO := $(ML:.ml=.cmo)
 CMI := $(ML:.ml=.cmi)
 CMX := $(ML:.ml=.cmx)
@@ -25,7 +25,7 @@ CMTI := $(MLI:.mli=.cmti)
 
 OCAMLCFLAGS := $(OCAMLCFLAGS) -linkall
 
-all: $(TARGET) $(TARGET:.cma=.cmxa) camlp5.pa_ppx_seq camlp5.pa_ppx_seq.opt
+all: $(TARGET) $(TARGET:.cma=.cmxa) camlp5.pa_ppx_string camlp5.pa_ppx_string.opt
 	$(MAKE) DESTDIR=$(WD)/$(TOP)/local-install/ install
 
 test:: all
@@ -33,11 +33,11 @@ test:: all
 
 doc: $(CMT) $(CMTI)
 
-camlp5.pa_ppx_seq: $(TARGET)
-	$(MKCAMLP5) -verbose -package fmt,camlp5.pa_r,camlp5.pr_r,pa_ppx.base $(TARGET) -o $@
+camlp5.pa_ppx_string: $(TARGET)
+	$(MKCAMLP5) -verbose -package fmt,re,camlp5.pa_r,camlp5.pr_r,pa_ppx.base $(TARGET) -o $@
 
-camlp5.pa_ppx_seq.opt: $(TARGET:.cma=.cmxa)
-	$(MKCAMLP5).opt -verbose -package fmt,camlp5.pa_r,camlp5.pr_r,pa_ppx.base $(TARGET:.cma=.cmxa) -o $@
+camlp5.pa_ppx_string.opt: $(TARGET:.cma=.cmxa)
+	$(MKCAMLP5).opt -verbose -package fmt,re,camlp5.pa_r,camlp5.pr_r,pa_ppx.base $(TARGET:.cma=.cmxa) -o $@
 
 META: META.pl
 	./META.pl > META
@@ -45,11 +45,11 @@ META: META.pl
 install::
 	mkdir -p $(DESTDIR)/lib
 	./META.pl $(DESTDIR)/lib > META
-	$(NOT_OCAMLFIND) reinstall-if-diff pa_ppx_seq -destdir $(DESTDIR)/lib META $(TARGET) $(TARGET:.cma=.cmxa) $(TARGET:.cma=.a) $(wildcard *.cmt*)
+	$(NOT_OCAMLFIND) reinstall-if-diff pa_ppx_string -destdir $(DESTDIR)/lib META $(TARGET) $(TARGET:.cma=.cmxa) $(TARGET:.cma=.a) $(wildcard *.cmt*)
 	$(RM) -f META
 
 clean::
-	rm -rf META camlp5.pa_ppx_seq* local-install
+	rm -rf META camlp5.pa_ppx_string* local-install
 	make -C test clean
 
 $(TARGET): $(CMO)

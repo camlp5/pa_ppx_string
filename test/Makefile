@@ -7,15 +7,15 @@ OCAMLFIND=$(LAUNCH) ocamlfind
 NOT_OCAMLFIND=$(LAUNCH) not-ocamlfind
 SYNTAX := camlp5o
 
-PACKAGES := $(PACKAGES),pa_ppx_seq
+PACKAGES := $(PACKAGES),pa_ppx_string,ounit2
 
-all: ppx_seq.exe
+all: ppx_string.exe
 
 all-tests:: all
-	./ppx_seq.exe
+	mkdir -p _build && ./ppx_string.exe
 
-ppx_seq.exe: ppx_seq.cmo
+ppx_string.exe: ppx_string.cmo
 	$(OCAMLFIND) ocamlc $(OCAMLCFLAGS) -package $(PACKAGES) -linkpkg -linkall -o $@ $<
 
 clean::
-	rm -f *.cm*
+	rm -rf *.cm* _build

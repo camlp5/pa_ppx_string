@@ -6,6 +6,7 @@
 #require "rresult";;
 #require "pcre";;
 #require "bos";;
+#require "re";;
 
 #require "camlp5.pa_op";;
 Pcaml.inter_phrases := Some ";;\n";;
@@ -32,5 +33,5 @@ Pcaml.inter_phrases := Some ";\n";;
 #require "camlp5.quotations";;
 #require "pa_ppx.testutils";;
 open Pa_ppx_testutils.Papr_util ;;
-#require "pa_ppx_seq";;
+#require "pa_ppx_string";;
 
