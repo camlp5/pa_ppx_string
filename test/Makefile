@@ -18,4 +18,4 @@ ppx_string.exe: ppx_string.cmo
 	$(OCAMLFIND) ocamlc $(OCAMLCFLAGS) -package $(PACKAGES) -linkpkg -linkall -o $@ $<
 
 clean::
-	rm -rf *.cm* _build
+	rm -rf *.cm* _build *ppo.ml

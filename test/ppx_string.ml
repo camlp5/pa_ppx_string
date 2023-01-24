@@ -8,7 +8,13 @@ let test_simple ctxt =
       let e = "b" in
       assert_equal ~printer "abc"  [%string "a{e}c"]
     end
-
+(*
+  ; begin
+      let e = "b" in
+      let width = 10 in
+      assert_equal ~printer "abc"  [%string "a{e:width}c"]
+    end
+ *)
 let suite = "Test pa_ppx_string" >::: [
       "simple"   >:: test_simple
     ]
