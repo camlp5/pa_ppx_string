@@ -11,7 +11,7 @@ PACKAGES := $(PACKAGES),pa_ppx_string,ounit2
 
 all: ppx_string.exe
 
-all-tests:: all
+test:: all
 	mkdir -p _build && ./ppx_string.exe
 
 ppx_string.exe: ppx_string.cmo

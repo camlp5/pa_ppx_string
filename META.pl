@@ -1,30 +1,62 @@
 #!/usr/bin/env perl
 
 use strict ;
-BEGIN { push (@INC, "..") }
+use IPC::System::Simple qw(systemx runx capturex $EXITVAL);
+use String::ShellQuote ;
+use File::Basename;
+
 use Version ;
 
-our $destdir = shift @ARGV ;
+our %pkgmap = (
+  'pa_ppx_string_runtime' => 'pa_ppx_string.runtime',
+  'pa_ppx_string' => 'pa_ppx_string',
+    );
 
-print <<"EOF";
-# Specifications for the "pa_ppx_string" preprocessor:
-requires = "camlp5,fmt,re,pa_ppx.base"
+{
+  my $stringmeta = indent(2, fixdeps(capturex("./pa_string/META.pl"))) ;
+  my $rtmeta = indent(2, fixdeps(capturex("./runtime/META.pl"))) ;
+
+  print <<"EOF";
 version = "$Version::version"
-description = "pa_ppx pa_string support"
+description = "pa_ppx_string: pa_ppx_string rewriter"
 
-# For linking
-package "link" (
-requires = "camlp5,fmt,re,pa_ppx.base.link"
-archive(byte) = "pa_ppx_string.cma"
-archive(native) = "pa_ppx_string.cmxa"
+$stringmeta
+
+package "runtime" (
+$rtmeta
 )
 
-# For the toploop:
-archive(byte,toploop) = "pa_ppx_string.cma"
-
-  # For the preprocessor itself:
-  requires(syntax,preprocessor) = "camlp5,fmt,re,pa_ppx.base"
-  archive(syntax,preprocessor,-native) = "pa_ppx_string.cma"
-  archive(syntax,preprocessor,native) = "pa_ppx_string.cmxa"
-
 EOF
+}
+
+sub fixdeps {
+  my $txt = join('', @_) ;
+  $txt =~ s,^(.*require.*)$, fix0($1) ,mge;
+  return $txt ; 
+}
+
+sub fix0 {
+  my $txt = shift ;
+  $txt =~ s,"([^"]+)", '"'. fix($1) .'"' ,e;
+  return $txt ;
+}
+
+sub fix {
+  my $txt = shift ;
+  my @l = split(/,/,$txt);
+  my @ol = () ;
+  foreach my $p (@l) {
+    $p =~ s,^([^.]+), $pkgmap{$1} || $1 ,e ;
+    push(@ol, $p);
+  }
+  $txt = join(',', @ol) ;
+  return $txt ;
+}
+
+sub indent {
+  my $n = shift ;
+  my $txt = shift ;
+  my $pfx = ' ' x $n ;
+  $txt =~ s,^,$pfx,gm;
+  return $txt ;
+}

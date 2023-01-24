@@ -1,72 +1,40 @@
 # Makefile,v
 # Copyright (c) INRIA 2007-2017
 
-WD=$(shell pwd)
 TOP=.
 include $(TOP)/config/Makefile
 
+WD=$(shell pwd)
 DESTDIR=
 RM=rm
 
-LAUNCH=
-OCAMLFIND=$(LAUNCH) ocamlfind
-NOT_OCAMLFIND=$(LAUNCH) not-ocamlfind
-MKCAMLP5=$(LAUNCH) mkcamlp5
-SYNTAX := camlp5o
+SYSDIRS= runtime pa_string
 
-PACKAGES := $(PACKAGES),fmt,pa_ppx.base,re
-TARGET := pa_ppx_string.cma
-ML := pa_string.ml
-CMO := $(ML:.ml=.cmo)
-CMI := $(ML:.ml=.cmi)
-CMX := $(ML:.ml=.cmx)
-CMT := $(ML:.ml=.cmt)
-CMTI := $(MLI:.mli=.cmti)
+TESTDIRS= tests
 
-OCAMLCFLAGS := $(OCAMLCFLAGS) -linkall
+all: sys
+	set -e; for i in $(TESTDIRS); do cd $$i; $(MAKE) all; cd ..; done
 
-all: $(TARGET) $(TARGET:.cma=.cmxa) camlp5.pa_ppx_string camlp5.pa_ppx_string.opt
-	$(MAKE) DESTDIR=$(WD)/$(TOP)/local-install/ install
+sys:
+	set -e; for i in $(SYSDIRS); do cd $$i; $(MAKE) all; cd ..; done
 
-test:: all
-	make -C test clean all-tests
-
-doc: $(CMT) $(CMTI)
-
-camlp5.pa_ppx_string: $(TARGET)
-	$(MKCAMLP5) -verbose -package fmt,re,camlp5.pa_r,camlp5.pr_r,pa_ppx.base $(TARGET) -o $@
-
-camlp5.pa_ppx_string.opt: $(TARGET:.cma=.cmxa)
-	$(MKCAMLP5).opt -verbose -package fmt,re,camlp5.pa_r,camlp5.pr_r,pa_ppx.base $(TARGET:.cma=.cmxa) -o $@
+test: all
+	set -e; for i in $(TESTDIRS); do cd $$i; $(MAKE) test; cd ..; done
 
 META: META.pl
 	./META.pl > META
 
-install::
-	mkdir -p $(DESTDIR)/lib
-	./META.pl $(DESTDIR)/lib > META
-	$(NOT_OCAMLFIND) reinstall-if-diff pa_ppx_string -destdir $(DESTDIR)/lib META $(TARGET) $(TARGET:.cma=.cmxa) $(TARGET:.cma=.a) $(wildcard *.cmt*)
-	$(RM) -f META
+install: sys META.pl
+	$(OCAMLFIND) remove pa_ppx_string || true
+	./META.pl > META
+	$(OCAMLFIND) install pa_ppx_string META local-install/lib/*/*.*
+
+uninstall:
+	$(OCAMLFIND) remove pa_ppx_string || true
 
 clean::
-	rm -rf META camlp5.pa_ppx_string* local-install
-	make -C test clean
+	set -e; for i in $(SYSDIRS) $(TESTDIRS); do cd $$i; $(MAKE) clean; cd ..; done
+	rm -rf docs local-install $(BATCHTOP) META
 
-$(TARGET): $(CMO)
-	$(OCAMLFIND) ocamlc $(DEBUG) $(CMO) -a -o $(TARGET)
-
-$(TARGET:.cma=.cmxa): $(CMO:.cmo=.cmx)
-	$(OCAMLFIND) ocamlopt $(DEBUG) $(CMO:.cmo=.cmx) -a -o $(TARGET:.cma=.cmxa)
-
-$(TARGET): $(CMO)
-$(TARGET:.cma=.cmxa): $(CMO:.cmo=.cmx)
-
-EXTERNAL := $(shell $(OCAMLFIND) query -predicates byte -format '%m' $(PACKAGES) | grep local-install)
-$(CMO) $(CMI) $(CMX): $(EXTERNAL)
-
-depend::
-	echo "$(CMO) $(CMI) $(CMX): $(EXTERNAL)" > .depend.NEW
-	$(OCAMLFIND) ocamldep $(DEBUG) -package $(PACKAGES) -syntax camlp5o *.ml *.mli >> .depend.NEW \
-		&& mv .depend.NEW .depend
-
--include .depend
+depend:
+	set -e; for i in $(SYSDIRS) $(TESTDIRS); do cd $$i; $(MAKE) depend; cd ..; done
