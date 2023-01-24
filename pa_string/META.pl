@@ -10,7 +10,7 @@ print <<"EOF";
 # Specifications for the "pa_ppx_string" preprocessor:
 requires = "camlp5,fmt,re,pa_ppx.base,pa_ppx_string_runtime"
 version = "$Version::version"
-description = "pa_ppx pa_string support"
+description = "pa_ppx_string: pa_ppx_string rewriter"
 
 # For linking
 package "link" (

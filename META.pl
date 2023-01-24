@@ -17,9 +17,6 @@ our %pkgmap = (
   my $rtmeta = indent(2, fixdeps(capturex("./runtime/META.pl"))) ;
 
   print <<"EOF";
-version = "$Version::version"
-description = "pa_ppx_string: pa_ppx_string rewriter"
-
 $stringmeta
 
 package "runtime" (
