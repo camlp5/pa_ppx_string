@@ -38,7 +38,7 @@ install::
 	$(RM) -f META
 
 clean::
-	rm -rf META camlp5.pa_ppx_string*
+	rm -rf META camlp5.pa_ppx_string* *ppo.ml
 
 $(TARGET): $(CMO)
 	$(OCAMLFIND) ocamlc $(DEBUG) $(CMO) -a -o $(TARGET)

@@ -25,7 +25,7 @@ ppx_string.exe: ppx_string.cmo
 	$(OCAMLFIND) ocamlc $(OCAMLCFLAGS) -package $(PACKAGES) -linkpkg -linkall -o $@ $<
 
 clean::
-	rm -rf *.cm* _build *ppo.ml
+	rm -rf *.cm* _build *ppo.ml *.exe
 
 EXTERNAL := $(shell $(OCAMLFIND) query -predicates byte -format '%m' $(PACKAGES) | grep local-install)
 $(CMO) $(TESTS): $(EXTERNAL)
